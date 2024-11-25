@@ -48,8 +48,16 @@ set(CMAKE_VISIBILITY_INLINES_HIDDEN ON)
 set(GODOT_CPP_SYSTEM_HEADERS ON CACHE BOOL "" FORCE)
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/ext/godot-cpp")
 
-# sourcepp
-# add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/ext/sourcepp")
+# glfw
+add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/ext/glfw")
+include_directories("${CMAKE_CURRENT_SOURCE_DIR}/ext/glad/include")
+
+# glad
+add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/ext/glad")
+include_directories("${CMAKE_CURRENT_SOURCE_DIR}/ext/glad/include")
+
+# bridge sdk
+include_directories(SYSTEM "../BridgeRuntime")
 
 add_custom_target(${PROJECT_NAME})
 
@@ -105,7 +113,7 @@ function(bridge_configure_library TARGET)
     configure_file("${CMAKE_CURRENT_SOURCE_DIR}/res/bin/${CMAKE_BUILD_TYPE}.gdextension.in" "${${TARGET}_OUT_DIR}/../${TARGET}.gdextension")
 
     # Link to helpers and godot-cpp
-    target_link_libraries(${TARGET} PRIVATE godot::cpp)
+    target_link_libraries(${TARGET} PRIVATE godot::cpp glfw glad)
 
     # Add to project target
     add_dependencies(${PROJECT_NAME} ${TARGET})
