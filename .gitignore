@@ -1,0 +1,8 @@
+﻿build/
+*.pdb
+*.dll
+
+project/.godot/
+project/android/
+project/addons/glassbridge/bin/gdbridge.gdextension
+project/addons/glassbridge/plugin.cfg

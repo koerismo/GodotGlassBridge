@@ -1,0 +1,8 @@
+[configuration]
+entry_symbol = "library_init"
+compatibility_minimum = 4.3
+
+[libraries]
+linux.release.x86_64 = "res://addons/glassbridge/bin/Linux_x86_64/Release/lib${TARGET}.so"
+macos.release = "res://addons/glassbridge/bin/Darwin_Universal/Release/lib${TARGET}.dylib"
+windows.release.x86_64 = "res://addons/glassbridge/bin/Windows_AMD64/Release/${TARGET}.dll"

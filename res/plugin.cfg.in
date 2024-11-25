@@ -1,0 +1,7 @@
+[plugin]
+
+name="GlassBridge"
+description="${PROJECT_DESCRIPTION}"
+author="Jadon L (@koerismo)"
+version="${PROJECT_VERSION}"
+script="main.gd"

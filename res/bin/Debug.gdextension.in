@@ -1,0 +1,8 @@
+[configuration]
+entry_symbol = "library_init"
+compatibility_minimum = 4.3
+
+[libraries]
+linux.debug.x86_64 = "res://addons/glassbridge/bin/Linux_x86_64/Debug/lib${TARGET}d.so"
+macos.debug = "res://addons/glassbridge/bin/Darwin_Universal/Debug/lib${TARGET}d.dylib"
+windows.debug.x86_64 = "res://addons/glassbridge/bin/Windows_AMD64/Debug/${TARGET}d.dll"
