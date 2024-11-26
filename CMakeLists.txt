@@ -57,7 +57,7 @@ add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/ext/glad")
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/ext/glad/include")
 
 # bridge sdk
-include_directories(SYSTEM "../BridgeRuntime")
+include_directories("${CMAKE_CURRENT_SOURCE_DIR}/ext/BridgeRuntime")
 
 add_custom_target(${PROJECT_NAME})
 

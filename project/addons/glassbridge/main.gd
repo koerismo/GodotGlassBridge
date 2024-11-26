@@ -1,15 +1,11 @@
 @tool
 extends EditorPlugin
 
-# var VMT_IMPORT_PLUGIN: EditorImportPlugin = null
+const GlassViewGizmoPlugin = preload("res://addons/glassbridge/gizmo.gd");
+var glassViewGizmoPlugin = GlassViewGizmoPlugin.new();
 
 func _enter_tree():
-	pass
-	# VMT_IMPORT_PLUGIN = preload("res://addons/godotglassbridge/scripts/vmt.gd").new()
-	# add_import_plugin(VMT_IMPORT_PLUGIN)
-
+	add_node_3d_gizmo_plugin(glassViewGizmoPlugin);
 
 func _exit_tree():
-	pass
-	# remove_import_plugin(VMT_IMPORT_PLUGIN)
-	# VMT_IMPORT_PLUGIN = null
+	remove_node_3d_gizmo_plugin(glassViewGizmoPlugin);

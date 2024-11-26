@@ -10,7 +10,7 @@ using namespace godot;
 void init_module(ModuleInitializationLevel p_level) {
 	if (p_level != MODULE_INITIALIZATION_LEVEL_SCENE) return;
 
-	GDREGISTER_CLASS(GDExample);
+	GDREGISTER_CLASS(GlassVolume3D);
 }
 
 void uninit_module(ModuleInitializationLevel p_level) {

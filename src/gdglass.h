@@ -1,24 +1,199 @@
 #ifndef GDGLASS_H
 #define GDGLASS_H
 
-#include <godot_cpp/classes/node3d.hpp>
+#include <glad/glad.h>
+#include <GLFW/glfw3.h>
+
+#define GLFW_EXPOSE_NATIVE_WIN32
+#define GLFW_EXPOSE_NATIVE_WGL
+#include <GLFW/glfw3native.h>
+
+#include <godot_cpp/classes/area3d.hpp>
+#include <godot_cpp/classes/environment.hpp>
+#include <godot_cpp/classes/viewport_texture.hpp>
+#include <godot_cpp/classes/shader.hpp>
+#include <godot_cpp/classes/input.hpp>
 
 namespace godot {
 
-	class GDExample : public Node3D {
-		GDCLASS(GDExample, Node3D)
+	class GlassVolume3D : public Area3D {
+		GDCLASS(GlassVolume3D, Area3D)
+
+	public:
+		enum QuiltPreset {
+			LOW_QUALITY, // 24 views
+			MEDIUM_QUALITY, // 32 views
+			HIGH_QUALITY, // 45 views
+			VERY_HIGH_QUALITY // 8k
+		};
 
 	private:
-		double t;
+		/////////////////////////////// CAMERA PROPERTIES ///////////////////////////////
+
+		// Window position, screen dimensions, aspect
+		long win_x, win_y;
+		unsigned long screen_w, screen_h;
+		float aspect;
+
+		// Whether the lenticular shader should be inverted
+		bool inv_view;
+
+		// Red/blue lenticular sub-pixel indices
+		int red_index, blue_index;
+
+		// // Lenticular calibration values
+		// float lent_pitch;
+		// float lent_offset;
+		// float lent_tilt;
+
+		// // Fringe correction value
+		// float fringe;
+
+		// // Display subpixel size
+		// float subpixel;
+
+		// Camera properties
+		float near_clip = 0.2f;
+		float far_clip = 0.5f;
+		float size = 1.0f;
+		uint32_t layers = 0xffffff;
+		Ref<Environment> environment;
+
+		/////////////////////////////// DEVICE PROPERTIES ///////////////////////////////
+
+		int device_index = 0;
+
+		bool dummy = false;
+
+		void update_device_properties();
+
+		/////////////////////////////// RENDERING PROPERTIES ///////////////////////////////
+
+		static Shader* blit_shader;
+		static Shader* lightfield_shader;
+		static const GLfloat tri_verts[6];
+
+		bool in_world = false;
+
+		HDC hdc;
+		GLFWwindow* window = nullptr;
+		float scale_x = 1.0;
+		float scale_y = 1.0;
+
+		std::vector<RID> viewports;
+		std::vector<RID> cameras;
+		std::vector<RID> canvas_items; // Texture rects that are used to render to the quilt.
+		RID quilt_canvas; // Canvas for rendering the quilt.
+		RID quilt_viewport; // Viewport that contains the finished quilt.
+		Viewport *quilt_viewport_node;
+
+		float view_dist = 1.0f; // Distance between focus plane and viewer.
+		float view_cone = 80.0f; // Viewing cone in degrees.
+
+		QuiltPreset quilt_preset = QuiltPreset::MEDIUM_QUALITY;
+		int tex_width = 2048;
+		int tex_height = 2048;
+		int total_views = 32;
+		int num_cols = 4;
+		int num_rows = 8;
+
+		GLuint quilt_tex = 0;
+		GLuint quilt_fbo = 0; // quilt fbo
+		GLuint tri_vbo = 0;
+
+		bool debug_view = false;
+
+		void create_viewports_and_cameras();
+		void update_cameras();
+		void update_quilt_viewport();
+		void free_viewports_and_cameras();
+
+		void create_window();
+		void destroy_window();
+
+		void render_lightfield();
+
+		/////////////////////////////// MOUSE ///////////////////////////////
+
+		static GlassVolume3D *grabbed_display;
+
+		static void static_window_focus_callback(GLFWwindow* window, int focused);
+		static void static_window_content_scale_callback(GLFWwindow* window, float xscale, float yscale);
+		void window_focus_callback(bool focused);
+		void window_content_scale_callback(float xscale, float yscale);
+
+		Vector2 mouse_pos;
+		Input::MouseMode orig_mouse_mode;
+		bool wait_for_active = false;
+
 
 	protected:
 		static void _bind_methods();
 	
 	public:
-		GDExample();
-		~GDExample();
+		static void compile_shaders();
+		static void free_shaders();
 
-		void _process(double delta) override;
+		GlassVolume3D();
+		~GlassVolume3D();
+
+		// void _process(double delta) override;
+		void _init();
+
+		void _process(float delta);
+		void _input(const Ref<InputEvent> event);
+
+		void _notification(int what);
+
+		float get_aspect() const;
+		Rect2 get_rect() const;
+
+		uint32_t get_cull_mask() const;
+		void set_cull_mask(uint32_t p_layers);
+
+		void set_cull_mask_bit(int p_layer, bool p_enable);
+		bool get_cull_mask_bit(int p_layer) const;
+
+		Ref<Environment> get_environment() const;
+		void set_environment(const Ref<Environment> p_environment);
+
+		int get_device_index() const;
+		void set_device_index(int p_device_index);
+
+		bool get_dummy() const;
+		void set_dummy(bool p_dummy);
+
+		bool get_debug_view() const;
+		void set_debug_view(bool p_debug_view);
+
+		float get_near_clip() const;
+		void set_near_clip(float p_near_clip);
+
+		float get_far_clip() const;
+		void set_far_clip(float p_far_clip);
+
+		float get_view_dist() const;
+		void set_view_dist(float p_view_dist);
+
+		float get_view_cone() const;
+		void set_view_cone(float p_view_cone);
+
+		float get_size() const;
+		void set_size(float p_size);
+
+		int get_quilt_preset() const;
+		void set_quilt_preset(int p_quilt_preset);
+
+		void grab_mouse();
+		void release_mouse();
+
+		Vector2 get_mouse_position() const;
+
+		Vector3 project_position(Vector2 screen_point, float z_depth) const;
+		Vector3 project_ray_normal(Vector2 screen_point) const;
+		Vector3 project_ray_origin(Vector2 screen_point) const;
+
+		Ref<ViewportTexture> get_quilt_tex() const;
 	};
 
 }
