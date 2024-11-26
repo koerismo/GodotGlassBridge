@@ -58,6 +58,10 @@ include_directories("${CMAKE_CURRENT_SOURCE_DIR}/ext/glad/include")
 
 # bridge sdk
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/ext/BridgeRuntime")
+if( MSVC )
+    SET( CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /ENTRY:mainCRTStartup" ) 
+endif()
+
 
 add_custom_target(${PROJECT_NAME})
 
