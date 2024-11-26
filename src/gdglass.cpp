@@ -27,9 +27,6 @@
 #include <godot_cpp/classes/viewport.hpp>
 #include <godot_cpp/classes/shader.hpp>
 
-#include <vector>
-#include <string>
-
 using namespace godot;
 
 Shader* GlassVolume3D::blit_shader = nullptr;
@@ -40,7 +37,7 @@ const GLfloat GlassVolume3D::tri_verts[6] = {
         3.0, -1.0
 };
 GlassVolume3D* GlassVolume3D::grabbed_display = nullptr;
-
+Controller* GlassVolume3D::bridge = new Controller();
 
 
 void GlassVolume3D::compile_shaders() {}
@@ -293,6 +290,7 @@ void GlassVolume3D::_init() {
 void GlassVolume3D::_notification(int event) {
 	if (event == Area3D::NOTIFICATION_ENTER_WORLD) {
 		in_world = true;
+		bridge->Initialize((wchar_t*)"GodotGlassBridge");
 
 		glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
         glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
@@ -400,12 +398,12 @@ void GlassVolume3D::_process(float delta) {
 
 void GlassVolume3D::update_device_properties() {
 	if (!dummy) {
-		get_window_position_for_display(device_index, &win_x, &win_y);
-		get_dimensions_for_display(device_index, &screen_w, &screen_h);
-		get_displayaspect_for_display(device_index, &aspect);
-		get_invview_for_display(device_index, (int*)&inv_view);
-		get_ri_for_display(device_index, &red_index);
-		get_bi_for_display(device_index, &blue_index);
+		bridge->GetWindowPositionForDisplay(device_index, &win_x, &win_y);
+		bridge->GetDimensionsForDisplay(device_index, &screen_w, &screen_h);
+		bridge->GetDisplayAspectForDisplay(device_index, &aspect);
+		bridge->GetInvViewForDisplay(device_index, (int*)&inv_view);
+		bridge->GetRiForDisplay(device_index, &red_index);
+		bridge->GetBiForDisplay(device_index, &blue_index);
 	}
 	else
 	{
@@ -554,6 +552,25 @@ void GlassVolume3D::update_quilt_viewport() {
         RenderingServer *vs = RenderingServer::get_singleton();
         vs->viewport_set_size(quilt_viewport, tex_width, tex_height);
     }
+}
+
+void godot::GlassVolume3D::free_viewports_and_cameras() {
+	RenderingServer *vs = RenderingServer::get_singleton();
+	for (int i = 0; i < viewports.size(); ++i) {
+		RID viewport = viewports[i];
+		RID camera = cameras[i];
+		RID canvas_item = canvas_items[i];
+
+		// TODO: What does this translate to in 4.x?
+		// vs->viewport_detach(viewport);
+		vs->free_rid(viewport);
+		vs->free_rid(camera);
+		vs->free_rid(canvas_item);
+	}
+
+	viewports.resize(0);
+	cameras.resize(0);
+	canvas_items.resize(0);
 }
 
 void GlassVolume3D::static_window_focus_callback(GLFWwindow *window, int focused) {

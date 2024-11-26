@@ -1,6 +1,12 @@
 #ifndef GDGLASS_H
 #define GDGLASS_H
 
+// For some godforsaken reason this library will not compile
+// unless winsock2 is included before anything else. - Jadon
+#ifdef WIN32
+#include <Winsock2.h>
+#endif
+
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
@@ -8,11 +14,15 @@
 #define GLFW_EXPOSE_NATIVE_WGL
 #include <GLFW/glfw3native.h>
 
+#include <bridge.h>
+#include <bridge_utils.hpp>
+
 #include <godot_cpp/classes/area3d.hpp>
 #include <godot_cpp/classes/environment.hpp>
 #include <godot_cpp/classes/viewport_texture.hpp>
 #include <godot_cpp/classes/shader.hpp>
 #include <godot_cpp/classes/input.hpp>
+#include <godot_cpp/classes/input_event.hpp>
 
 namespace godot {
 
@@ -69,6 +79,8 @@ namespace godot {
 
 		/////////////////////////////// RENDERING PROPERTIES ///////////////////////////////
 
+		static Controller* bridge;
+
 		static Shader* blit_shader;
 		static Shader* lightfield_shader;
 		static const GLfloat tri_verts[6];
@@ -108,8 +120,8 @@ namespace godot {
 		void update_quilt_viewport();
 		void free_viewports_and_cameras();
 
-		void create_window();
-		void destroy_window();
+		// void create_window();
+		// void destroy_window();
 
 		void render_lightfield();
 
